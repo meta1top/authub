@@ -1,0 +1,168 @@
+{
+  "repository_type": "monorepo",
+  "parts": [
+    {
+      "part_id": "web",
+      "project_type_id": "web",
+      "display_name": "Web Application",
+      "root_path": "apps/web",
+      "tech_stack": "Next.js 16, React 19, TypeScript",
+      "architecture_pattern": "Component-based Layered Architecture",
+      "entry_point": "apps/web/src/app/layout.tsx",
+      "build_command": "pnpm run build:web",
+      "dev_command": "pnpm run dev:web",
+      "port": 4002
+    },
+    {
+      "part_id": "server",
+      "project_type_id": "backend",
+      "display_name": "Backend Service",
+      "root_path": "apps/server",
+      "tech_stack": "NestJS 11, TypeORM, MySQL, Redis",
+      "architecture_pattern": "Modular Service Architecture",
+      "entry_point": "apps/server/src/main.ts",
+      "build_command": "pnpm run build:server",
+      "dev_command": "pnpm run dev:server",
+      "port": 3100
+    },
+    {
+      "part_id": "libs",
+      "project_type_id": "library",
+      "display_name": "Shared Libraries",
+      "root_path": "libs",
+      "tech_stack": "TypeScript libraries",
+      "architecture_pattern": "Modular Library Design",
+      "libraries": [
+        {
+          "name": "@meta-1/authub-account",
+          "path": "libs/account",
+          "purpose": "Account management, authentication, OTP functionality"
+        },
+        {
+          "name": "@meta-1/authub-app",
+          "path": "libs/app",
+          "purpose": "Application management functionality"
+        },
+        {
+          "name": "@meta-1/authub-common",
+          "path": "libs/common",
+          "purpose": "Shared utilities and services"
+        },
+        {
+          "name": "@meta-1/authub-types",
+          "path": "libs/types",
+          "purpose": "Shared TypeScript types and Zod schemas"
+        }
+      ]
+    }
+  ],
+  "integration_points": [
+    {
+      "from": "web",
+      "to": "server",
+      "type": "REST API",
+      "protocol": "HTTP/HTTPS",
+      "authentication": "JWT Token",
+      "data_format": "JSON",
+      "endpoints": [
+        "/api/account/*",
+        "/api/apps/*",
+        "/api/profile/*",
+        "/api/assets/*",
+        "/api/config",
+        "/api/mail-code/*"
+      ],
+      "description": "Web application communicates with server via REST API using JWT authentication"
+    },
+    {
+      "from": "server",
+      "to": "libs/account",
+      "type": "Module Import",
+      "protocol": "NestJS DI",
+      "description": "Server imports AccountModule for authentication and account management"
+    },
+    {
+      "from": "server",
+      "to": "libs/app",
+      "type": "Module Import",
+      "protocol": "NestJS DI",
+      "description": "Server imports AppModule for application management"
+    },
+    {
+      "from": "server",
+      "to": "libs/common",
+      "type": "Module Import",
+      "protocol": "NestJS DI",
+      "description": "Server imports CommonModule for shared utilities"
+    },
+    {
+      "from": "web",
+      "to": "libs/types",
+      "type": "Type Import",
+      "protocol": "TypeScript",
+      "description": "Web application imports shared types for type safety"
+    },
+    {
+      "from": "server",
+      "to": "libs/types",
+      "type": "Type Import",
+      "protocol": "TypeScript",
+      "description": "Server imports shared types for type safety"
+    },
+    {
+      "from": "server",
+      "to": "mysql",
+      "type": "Database",
+      "protocol": "TypeORM",
+      "description": "Server uses TypeORM to connect to MySQL database"
+    },
+    {
+      "from": "server",
+      "to": "redis",
+      "type": "Cache",
+      "protocol": "ioredis",
+      "description": "Server uses Redis for caching and session storage"
+    },
+    {
+      "from": "server",
+      "to": "nacos",
+      "type": "Configuration",
+      "protocol": "HTTP API",
+      "description": "Server uses Nacos for centralized configuration management"
+    }
+  ],
+  "shared_dependencies": ["@meta-1/authub-types"],
+  "external_services": [
+    {
+      "name": "MySQL",
+      "type": "Database",
+      "required": true,
+      "description": "Relational database for data persistence"
+    },
+    {
+      "name": "Redis",
+      "type": "Cache",
+      "required": true,
+      "description": "Cache and session storage"
+    },
+    {
+      "name": "Nacos",
+      "type": "Configuration",
+      "required": false,
+      "description": "Configuration center and service discovery",
+      "fallback": "Degraded mode if unavailable"
+    },
+    {
+      "name": "AWS SES / Aliyun Email",
+      "type": "Email Service",
+      "required": false,
+      "description": "Email sending service"
+    },
+    {
+      "name": "S3 / OSS",
+      "type": "File Storage",
+      "required": false,
+      "description": "File and asset storage"
+    }
+  ]
+}
